@@ -211,7 +211,21 @@ function Client:new(conf)
   end
 
   
-  function client:query(sql,cb)
+  function client:query(sql, ...)
+    local cb = ...
+    if cb and type(cb) ~= "function" then
+      self.log("base query:", sql )
+
+      local args = { ... }
+      for k, v in ipairs(args) do
+        if type(v) == "function" then
+          cb = v
+          break
+        end
+
+        sql = sql:gsub("?", self:escape(v), 1)
+      end
+    end
     self.log("query:", sql )
     assert( type(sql)=="string", "not implemented")
 
